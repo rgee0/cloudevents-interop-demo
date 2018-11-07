@@ -18,7 +18,7 @@ func getWordList() map[string][]string {
 		Timeout: time.Second * 3,
 	}
 
-	wordsURL := os.Getenv("wordsURL")
+	wordsURL := os.Getenv(wordsURLEnvVar)
 
 	if len(wordsURL) <= 0 {
 		log.Panic("wordsURL env var not set or empty")

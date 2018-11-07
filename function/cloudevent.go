@@ -2,9 +2,11 @@ package function
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/docker/distribution/uuid"
+	"github.com/mitchellh/mapstructure"
 )
 
 // CloudEvent v0.1
@@ -32,11 +34,37 @@ func initCloudEvent(eventType string) CloudEvent {
 	}
 }
 
+// getCloudEvent returns a pointer to a CloudEvent extracted from the
+// request submitted to the handler
 func getCloudEvent(req []byte) (*CloudEvent, error) {
 	c := CloudEvent{}
+
 	if err := json.Unmarshal(req, &c); err != nil {
 		return nil, err
 	}
+
+	return &c, nil
+}
+
+func getBinaryCloudEvent(header map[string][]string) (*CloudEvent, error) {
+	c := CloudEvent{}
+
+	var headers = make(map[string]string)
+
+	for headerKey, headerVal := range header {
+
+		if !strings.HasPrefix(headerKey, "Ce-") {
+			continue
+		}
+
+		headerKey = strings.TrimPrefix(headerKey, "Ce-")
+		headerKey = strings.Replace(headerKey, "-", "", -1)
+		headers[headerKey] = headerVal[0]
+
+	}
+
+	mapstructure.Decode(headers, &c)
+
 	return &c, nil
 }
 

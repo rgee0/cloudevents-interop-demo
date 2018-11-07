@@ -8,7 +8,10 @@ import (
 	"github.com/openfaas-incubator/go-function-sdk"
 )
 
-const structuredContentType = "cloudevents"
+const (
+	structuredContentType = "cloudevents"
+	wordsURLEnvVar        = "wordsURL"
+)
 
 var wordList = make(map[string][]string)
 
@@ -39,6 +42,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		err      error
 		bMessage []byte
 		c        *CloudEvent
+		debug    string
 	)
 
 	if len(wordList) == 0 {
@@ -48,16 +52,24 @@ func Handle(req handler.Request) (handler.Response, error) {
 	if isStructured(req.Header["Content-Type"]) {
 
 		c, err = getCloudEvent(req.Body)
+		debug = "structured"
 
-		wordType := strings.Split(c.EventType, ".")[2]
-		dataField := getWordValue(wordList[wordType])
+	} else {
 
-		if dataField != nil {
-			retEventType := strings.Replace(c.EventType, "found", "picked", -1)
-			retEvent := initCloudEvent(retEventType)
-			retEvent.Data, err = json.Marshal(&dataField)
-			bMessage, err = setCloudEvent(&retEvent)
-		}
+		c, err = getBinaryCloudEvent(req.Header)
+		c.Data = req.Body
+		debug = "binary"
+
+	}
+
+	wordType := strings.Split(c.EventType, ".")[2]
+	dataField := getWordValue(wordList[wordType])
+
+	if dataField != nil {
+		retEventType := strings.Replace(c.EventType, "found", "picked", -1)
+		retEvent := initCloudEvent(retEventType)
+		retEvent.Data, err = json.Marshal(&dataField)
+		bMessage, err = setCloudEvent(&retEvent)
 	}
 
 	return handler.Response{
@@ -65,6 +77,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		StatusCode: http.StatusOK,
 		Header: map[string][]string{
 			"Content-Type": []string{"application/cloudevents+json"},
+			"Debug":        []string{debug},
 		},
 	}, err
 }
