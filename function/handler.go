@@ -8,6 +8,8 @@ import (
 	"github.com/openfaas-incubator/go-function-sdk"
 )
 
+const structuredContentType = "cloudevents"
+
 var wordList = make(map[string][]string)
 
 func init() {
@@ -16,26 +18,46 @@ func init() {
 
 }
 
+// The receiver of the event can distinguish between the two modes by inspecting the Content-Type header value.
+// If the value is prefixed with the CloudEvents media type application/cloudevents, indicating the use of a known
+// event format, the receiver uses structured mode, otherwise it defaults to binary mode.
+// https://github.com/cloudevents/spec/blob/a12b6b618916c89bfa5595fc76732f07f89219b5/http-transport-binding.md#3-http-message-mapping
+func isStructured(httpContentTypes []string) bool {
+
+	for _, cType := range httpContentTypes {
+		if strings.Contains(cType, structuredContentType) {
+			return true
+		}
+	}
+	return false
+}
+
 // Handle a function invocation
 func Handle(req handler.Request) (handler.Response, error) {
 
-	var err error
-	var bMessage []byte
+	var (
+		err      error
+		bMessage []byte
+		c        *CloudEvent
+	)
 
 	if len(wordList) == 0 {
 		wordList = getWordList()
 	}
 
-	c, err := getCloudEvent(req.Body)
+	if isStructured(req.Header["Content-Type"]) {
 
-	wordType := strings.Split(c.EventType, ".")[2]
-	dataField := getWordValue(wordList[wordType])
+		c, err = getCloudEvent(req.Body)
 
-	if dataField != nil {
-		returnEventType := strings.Replace(c.EventType, "found", "picked", -1)
-		retCEvent := initCloudEvent(returnEventType)
-		retCEvent.Data, err = json.Marshal(&dataField)
-		bMessage, err = setCloudEvent(&retCEvent)
+		wordType := strings.Split(c.EventType, ".")[2]
+		dataField := getWordValue(wordList[wordType])
+
+		if dataField != nil {
+			retEventType := strings.Replace(c.EventType, "found", "picked", -1)
+			retEvent := initCloudEvent(retEventType)
+			retEvent.Data, err = json.Marshal(&dataField)
+			bMessage, err = setCloudEvent(&retEvent)
+		}
 	}
 
 	return handler.Response{
