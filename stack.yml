@@ -1,0 +1,12 @@
+provider:
+  name: faas
+  gateway: http://127.0.0.1:8080
+functions:
+  cloudevents-interop-demo:
+    lang: golang-http
+    handler: ./function
+    image: rgee0/cloudevents-interop-demo:latest
+    environment: 
+      wordsURL : https://srcdog.com/madlibs/words.txt
+
+
