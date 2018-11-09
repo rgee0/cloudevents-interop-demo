@@ -46,7 +46,6 @@ func getWordList() map[string][]string {
 func getWordValue(wordList []string) map[string]string {
 
 	if listLength := len(wordList) - 1; listLength > 0 {
-		//rand.Seed(time.Now().Unix())
 		return map[string]string{"word": wordList[rand.Intn(listLength)]}
 	}
 	return nil

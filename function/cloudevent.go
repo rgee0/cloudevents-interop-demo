@@ -12,25 +12,25 @@ import (
 // CloudEvent v0.1
 // https://github.com/cloudevents/spec/blob/v0.1/json-format.md
 type CloudEvent struct {
-	EventType          string            `json:"eventType"`
-	EventTypeVersion   string            `json:"eventTypeVersion,omitempty"`
-	CloudEventsVersion string            `json:"cloudEventsVersion"`
-	Source             string            `json:"source"`
-	EventID            string            `json:"eventID"`
-	EventTime          time.Time         `json:"eventTime,omitempty"`
-	ContentType        string            `json:"contentType,omitempty"`
-	Extensions         map[string]string `json:"extensions,omitempty"`
-	Data               json.RawMessage   `json:"data,omitempty"`
+	Type             string            `json:"type"`
+	EventTypeVersion string            `json:"eventTypeVersion,omitempty"`
+	SpecVersion      string            `json:"specVersion"`
+	Source           string            `json:"source"`
+	ID               string            `json:"id"`
+	Time             time.Time         `json:"time,omitempty"`
+	ContentType      string            `json:"contentType,omitempty"`
+	Extensions       map[string]string `json:"extensions,omitempty"`
+	Data             json.RawMessage   `json:"data,omitempty"`
 }
 
-func initCloudEvent(eventType string) CloudEvent {
+func initCloudEvent(eType string) CloudEvent {
 	return CloudEvent{
-		EventType:          eventType,
-		CloudEventsVersion: "0.1",
-		Source:             "https://rgee0.o6s.io/cloudevents-interop-demo",
-		EventID:            uuid.Generate().String(),
-		EventTime:          time.Now(),
-		ContentType:        "application/json",
+		Type:        eType,
+		SpecVersion: "0.1",
+		Source:      "https://rgee0.o6s.io/cloudevents-interop-demo",
+		ID:          uuid.Generate().String(),
+		Time:        time.Now(),
+		ContentType: "application/json",
 	}
 }
 
@@ -53,11 +53,11 @@ func getBinaryCloudEvent(header map[string][]string) (*CloudEvent, error) {
 
 	for headerKey, headerVal := range header {
 
-		if !strings.HasPrefix(headerKey, "Ce-") {
+		if !strings.HasPrefix(headerKey, "ce-") {
 			continue
 		}
 
-		headerKey = strings.TrimPrefix(headerKey, "Ce-")
+		headerKey = strings.TrimPrefix(headerKey, "ce-")
 		headerKey = strings.Replace(headerKey, "-", "", -1)
 		headers[headerKey] = headerVal[0]
 

@@ -62,11 +62,11 @@ func Handle(req handler.Request) (handler.Response, error) {
 
 	}
 
-	wordType := strings.Split(c.EventType, ".")[2]
+	wordType := strings.Split(c.Type, ".")[2]
 	dataVal := getWordValue(wordList[wordType])
 
 	if dataVal != nil {
-		retEventType := strings.Replace(c.EventType, "found", "picked", -1)
+		retEventType := strings.Replace(c.Type, "found", "picked", -1)
 		retEvent := initCloudEvent(retEventType)
 		retEvent.Data, err = json.Marshal(&dataVal)
 		bMessage, err = setCloudEvent(&retEvent)
