@@ -18,6 +18,7 @@ type CloudEvent struct {
 	Source           string            `json:"source"`
 	ID               string            `json:"id"`
 	Time             time.Time         `json:"time,omitempty"`
+	RelatedID        string            `json:"relatedid,omitempty"`
 	ContentType      string            `json:"contentType,omitempty"`
 	Extensions       map[string]string `json:"extensions,omitempty"`
 	Data             json.RawMessage   `json:"data,omitempty"`

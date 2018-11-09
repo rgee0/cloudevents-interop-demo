@@ -69,6 +69,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		retEventType := strings.Replace(c.Type, "found", "picked", -1)
 		retEvent := initCloudEvent(retEventType)
 		retEvent.Data, err = json.Marshal(&dataVal)
+		retEvent.RelatedID = c.ID
 		bMessage, err = setCloudEvent(&retEvent)
 	}
 
