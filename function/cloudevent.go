@@ -77,8 +77,7 @@ func getBinaryCloudEvent(header map[string][]string) (*CloudEvent, error) {
 
 	for headerKey, headerVal := range header {
 
-		if !strings.EqualFold(headerKey[0:2], headerPrefix) {
-			//	if !strings.HasPrefix(headerKey, headerPrefix) {
+		if !strings.EqualFold(headerKey[:3], headerPrefix) {
 			continue
 		}
 
