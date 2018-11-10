@@ -48,21 +48,23 @@ func Handle(req handler.Request) (handler.Response, error) {
 		c        *CloudEvent
 	)
 
-	//temporary
-	postBackBody, err := json.Marshal(&req)
-	postBack, err := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
-	client := &http.Client{}
-	postBack.Header.Set("Content-Type", "application/json")
-	_, err = client.Do(postBack)
-	//temporary
-
 	if len(wordList) == 0 {
 		wordList = getWordList()
 	}
 
 	structuredRequest := isStructured(req.Header["Content-Type"])
-
 	c, err = getCloudEvent(&req, structuredRequest)
+
+	//temporary
+	if !structuredRequest {
+		postBackBody, _ := json.Marshal(&req)
+		postBack, _ := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
+		client := &http.Client{}
+		postBack.Header.Set("Content-Type", "application/json")
+		_, _ = client.Do(postBack)
+	}
+	//temporary
+
 	wordType := strings.Split(c.Type, ".")[2]
 	dataVal := getWordValue(wordList[wordType])
 
