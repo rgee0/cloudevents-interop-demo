@@ -7,6 +7,7 @@ import (
 
 	"github.com/docker/distribution/uuid"
 	"github.com/mitchellh/mapstructure"
+	"github.com/openfaas-incubator/go-function-sdk"
 )
 
 // CloudEvent v0.1
@@ -24,6 +25,8 @@ type CloudEvent struct {
 	Data             json.RawMessage   `json:"data,omitempty"`
 }
 
+const headerPrefix = "ce-"
+
 func initCloudEvent(eType string) CloudEvent {
 	return CloudEvent{
 		Type:        eType,
@@ -35,9 +38,18 @@ func initCloudEvent(eType string) CloudEvent {
 	}
 }
 
-// getCloudEvent returns a pointer to a CloudEvent extracted from the
-// request submitted to the handler
-func getCloudEvent(req []byte) (*CloudEvent, error) {
+func getCloudEvent(req *handler.Request, structuredRequest bool) (*CloudEvent, error) {
+
+	if structuredRequest {
+		return getStructuredCloudEvent(req.Body)
+	}
+
+	return getBinaryCloudEvent(req.Header)
+}
+
+// getStructuredCloudEvent returns a pointer to a CloudEvent extracted from the
+// structured request submitted to the handler
+func getStructuredCloudEvent(req []byte) (*CloudEvent, error) {
 	c := CloudEvent{}
 
 	if err := json.Unmarshal(req, &c); err != nil {
@@ -47,6 +59,8 @@ func getCloudEvent(req []byte) (*CloudEvent, error) {
 	return &c, nil
 }
 
+// getBinaryCloudEvent returns a pointer to a CloudEvent extracted from the
+// binary request submitted to the handler
 func getBinaryCloudEvent(header map[string][]string) (*CloudEvent, error) {
 	c := CloudEvent{}
 
@@ -54,11 +68,11 @@ func getBinaryCloudEvent(header map[string][]string) (*CloudEvent, error) {
 
 	for headerKey, headerVal := range header {
 
-		if !strings.HasPrefix(headerKey, "ce-") {
+		if !strings.HasPrefix(headerKey, headerPrefix) {
 			continue
 		}
 
-		headerKey = strings.TrimPrefix(headerKey, "ce-")
+		headerKey = strings.TrimPrefix(headerKey, headerPrefix)
 		headerKey = strings.Replace(headerKey, "-", "", -1)
 		headers[headerKey] = headerVal[0]
 

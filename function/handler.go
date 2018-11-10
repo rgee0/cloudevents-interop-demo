@@ -60,17 +60,9 @@ func Handle(req handler.Request) (handler.Response, error) {
 		wordList = getWordList()
 	}
 
-	if isStructured(req.Header["Content-Type"]) {
+	structuredRequest := isStructured(req.Header["Content-Type"])
 
-		c, err = getCloudEvent(req.Body)
-
-	} else {
-
-		c, err = getBinaryCloudEvent(req.Header)
-		c.Data = req.Body
-
-	}
-
+	c, err = getCloudEvent(&req, structuredRequest)
 	wordType := strings.Split(c.Type, ".")[2]
 	dataVal := getWordValue(wordList[wordType])
 
