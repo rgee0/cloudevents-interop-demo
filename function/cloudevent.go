@@ -2,6 +2,7 @@ package function
 
 import (
 	"encoding/json"
+	"net/http"
 	"strings"
 	"time"
 
@@ -53,7 +54,9 @@ func getCloudEvent(req *handler.Request, structuredRequest bool) (*CloudEvent, e
 		return getStructuredCloudEvent(req.Body)
 	}
 
-	return getBinaryCloudEvent(req.Header)
+	c, err := getBinaryCloudEvent(req.Header)
+	c.Data = req.Body
+	return c, err
 }
 
 // getStructuredCloudEvent returns a pointer to a CloudEvent extracted from the
@@ -81,7 +84,6 @@ func getBinaryCloudEvent(header map[string][]string) (*CloudEvent, error) {
 			continue
 		}
 
-		//headerKey = strings.TrimPrefix(headerKey, headerPrefix)
 		headerKey = headerKey[3:]
 		headerKey = strings.Replace(headerKey, "-", "", -1)
 		headers[headerKey] = headerVal[0]
@@ -99,4 +101,21 @@ func setCloudEvent(c *CloudEvent) ([]byte, error) {
 		return nil, err
 	}
 	return retBytes, nil
+}
+
+func sendCloudEvent(c *CloudEvent, err error) (handler.Response, error) {
+
+	if err != nil {
+		return handler.Response{}, err
+	}
+
+	bMessage, err := setCloudEvent(c)
+
+	return handler.Response{
+		Body:       bMessage,
+		StatusCode: http.StatusOK,
+		Header: map[string][]string{
+			"Content-Type": []string{"application/cloudevents+json"},
+		},
+	}, err
 }

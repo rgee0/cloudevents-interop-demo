@@ -76,11 +76,12 @@ func Handle(req handler.Request) (handler.Response, error) {
 		bMessage, err = setCloudEvent(retEvent)
 	}
 
-	return handler.Response{
-		Body:       bMessage,
-		StatusCode: http.StatusOK,
-		Header: map[string][]string{
-			"Content-Type": []string{"application/cloudevents+json"},
-		},
-	}, err
+	return sendCloudEvent(retEvent, err)
+	//	return handler.Response{
+	//		Body:       bMessage,
+	//		StatusCode: http.StatusOK,
+	//		Header: map[string][]string{
+	//			"Content-Type": []string{"application/cloudevents+json"},
+	//		},
+	//	}, err
 }
