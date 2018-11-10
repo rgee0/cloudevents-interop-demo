@@ -14,6 +14,8 @@ import (
 const (
 	structuredContentType = "cloudevents"
 	wordsURLEnvVar        = "wordsURL"
+	reqEventTypePattern   = "found"
+	resEventTypePattern   = "picked"
 )
 
 var wordList = make(map[string][]string)
@@ -43,9 +45,9 @@ func isStructured(httpContentTypes []string) bool {
 func Handle(req handler.Request) (handler.Response, error) {
 
 	var (
-		err      error
-		bMessage []byte
-		c        *CloudEvent
+		err         error
+		bMessage    []byte
+		c, retEvent *CloudEvent
 	)
 
 	if len(wordList) == 0 {
@@ -69,11 +71,9 @@ func Handle(req handler.Request) (handler.Response, error) {
 	dataVal := getWordValue(wordList[wordType])
 
 	if dataVal != nil {
-		retEventType := strings.Replace(c.Type, "found", "picked", -1)
-		retEvent := initCloudEvent(retEventType)
-		retEvent.Data, err = json.Marshal(&dataVal)
-		retEvent.RelatedID = c.ID
-		bMessage, err = setCloudEvent(&retEvent)
+		retEventType := strings.Replace(c.Type, reqEventTypePattern, resEventTypePattern, -1)
+		retEvent.initialise(retEventType, dataVal, c.ID)
+		bMessage, err = setCloudEvent(retEvent)
 	}
 
 	return handler.Response{

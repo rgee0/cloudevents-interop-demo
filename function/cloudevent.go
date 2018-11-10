@@ -27,14 +27,22 @@ type CloudEvent struct {
 
 const headerPrefix = "ce-"
 
-func initCloudEvent(eType string) CloudEvent {
+func (c *CloudEvent) initialise(eType string, data map[string]string, reqID string) CloudEvent {
+
+	dataField, err := json.Marshal(&data)
+	if err != nil {
+		dataField = nil
+	}
+
 	return CloudEvent{
 		Type:        eType,
 		SpecVersion: "0.1",
 		Source:      "https://rgee0.o6s.io/cloudevents-interop-demo",
 		ID:          uuid.Generate().String(),
+		RelatedID:   reqID,
 		Time:        time.Now(),
 		ContentType: "application/json",
+		Data:        dataField,
 	}
 }
 
