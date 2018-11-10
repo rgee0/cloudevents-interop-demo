@@ -2,6 +2,7 @@ package function
 
 import (
 	"encoding/json"
+	"net/http"
 	"strings"
 	"time"
 
@@ -27,15 +28,14 @@ type CloudEvent struct {
 
 const headerPrefix = "ce-"
 
-func initCloudEvent(eType string) CloudEvent {
-	return CloudEvent{
-		Type:        eType,
-		SpecVersion: "0.1",
-		Source:      "https://rgee0.o6s.io/cloudevents-interop-demo",
-		ID:          uuid.Generate().String(),
-		Time:        time.Now(),
-		ContentType: "application/json",
-	}
+func (c CloudEvent) inititialise(eType string) {
+
+	c.Type = eType
+	c.SpecVersion = "0.1"
+	c.Source = "https://rgee0.o6s.io/cloudevents-interop-demo"
+	c.ID = uuid.Generate().String()
+	c.Time = time.Now()
+	c.ContentType = "application/json"
 }
 
 func getCloudEvent(req *handler.Request, structuredRequest bool) (*CloudEvent, error) {
@@ -83,10 +83,36 @@ func getBinaryCloudEvent(header map[string][]string) (*CloudEvent, error) {
 	return &c, nil
 }
 
-func setCloudEvent(c *CloudEvent) ([]byte, error) {
+func setStructureCloudEvent(c *CloudEvent) ([]byte, error) {
 	retBytes, err := json.Marshal(c)
 	if err != nil {
 		return nil, err
 	}
 	return retBytes, nil
+}
+
+func cloudEventResponse(c *CloudEvent, structuredRequest bool) (handler.Response, error) {
+
+	var (
+		err      error
+		bMessage []byte
+	)
+
+	if structuredRequest {
+
+		bMessage, err = setStructureCloudEvent(c)
+
+		return handler.Response{
+			Body:       bMessage,
+			StatusCode: http.StatusOK,
+			Header: map[string][]string{
+				"Content-Type": []string{"application/cloudevents+json"},
+			},
+		}, err
+	}
+
+	return handler.Response{
+		Body:       bMessage,
+		StatusCode: http.StatusOK,
+	}, err
 }

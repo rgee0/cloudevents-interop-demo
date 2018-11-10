@@ -14,6 +14,8 @@ import (
 const (
 	structuredContentType = "cloudevents"
 	wordsURLEnvVar        = "wordsURL"
+	typeRequestWord       = "found"
+	typeResponseWord      = "picked"
 )
 
 var wordList = make(map[string][]string)
@@ -43,9 +45,7 @@ func isStructured(httpContentTypes []string) bool {
 func Handle(req handler.Request) (handler.Response, error) {
 
 	var (
-		err      error
-		bMessage []byte
-		c        *CloudEvent
+		c, retEvent *CloudEvent
 	)
 
 	if len(wordList) == 0 {
@@ -53,7 +53,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 	}
 
 	structuredRequest := isStructured(req.Header["Content-Type"])
-	c, err = getCloudEvent(&req, structuredRequest)
+	c, _ = getCloudEvent(&req, structuredRequest)
 
 	//temporary
 	if !structuredRequest {
@@ -69,18 +69,12 @@ func Handle(req handler.Request) (handler.Response, error) {
 	dataVal := getWordValue(wordList[wordType])
 
 	if dataVal != nil {
-		retEventType := strings.Replace(c.Type, "found", "picked", -1)
-		retEvent := initCloudEvent(retEventType)
-		retEvent.Data, err = json.Marshal(&dataVal)
+		retEventType := strings.Replace(c.Type, typeRequestWord, typeResponseWord, -1)
+		retEvent.inititialise(retEventType)
+		retEvent.Data, _ = json.Marshal(&dataVal)
 		retEvent.RelatedID = c.ID
-		bMessage, err = setCloudEvent(&retEvent)
 	}
 
-	return handler.Response{
-		Body:       bMessage,
-		StatusCode: http.StatusOK,
-		Header: map[string][]string{
-			"Content-Type": []string{"application/cloudevents+json"},
-		},
-	}, err
+	return cloudEventResponse(retEvent, structuredRequest)
+
 }
