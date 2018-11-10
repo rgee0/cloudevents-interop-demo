@@ -46,7 +46,6 @@ func Handle(req handler.Request) (handler.Response, error) {
 
 	var (
 		err         error
-		bMessage    []byte
 		c, retEvent *CloudEvent
 	)
 
