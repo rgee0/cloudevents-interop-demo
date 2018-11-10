@@ -95,12 +95,18 @@ func getBinaryCloudEvent(header map[string][]string) (*CloudEvent, error) {
 	return &c, nil
 }
 
-func setCloudEvent(c *CloudEvent) ([]byte, error) {
+func setStructuredCloudEvent(c *CloudEvent) ([]byte, map[string][]string, error) {
+
 	retBytes, err := json.Marshal(c)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return retBytes, nil
+
+	header := map[string][]string{
+		"Content-Type": []string{"application/cloudevents+json"},
+	}
+
+	return retBytes, header, nil
 }
 
 func sendCloudEvent(c *CloudEvent, structuredRequest bool, err error) (handler.Response, error) {
@@ -109,13 +115,12 @@ func sendCloudEvent(c *CloudEvent, structuredRequest bool, err error) (handler.R
 		return handler.Response{}, err
 	}
 
-	bMessage, err := setCloudEvent(c)
+	bMessage, headerVals, err := setStructuredCloudEvent(c)
 
 	return handler.Response{
 		Body:       bMessage,
 		StatusCode: http.StatusOK,
-		Header: map[string][]string{
-			"Content-Type": []string{"application/cloudevents+json"},
-		},
+		Header:     headerVals,
 	}, err
+
 }

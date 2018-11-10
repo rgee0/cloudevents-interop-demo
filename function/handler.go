@@ -72,15 +72,8 @@ func Handle(req handler.Request) (handler.Response, error) {
 	if dataVal != nil {
 		retEventType := strings.Replace(c.Type, reqEventTypePattern, resEventTypePattern, -1)
 		retEvent = initCloudEvent(retEventType, dataVal, c.ID)
-		//bMessage, err = setCloudEvent(retEvent)
 	}
 
 	return sendCloudEvent(retEvent, structuredRequest, err)
-	//	return handler.Response{
-	//		Body:       bMessage,
-	//		StatusCode: http.StatusOK,
-	//		Header: map[string][]string{
-	//			"Content-Type": []string{"application/cloudevents+json"},
-	//		},
-	//	}, err
+
 }
