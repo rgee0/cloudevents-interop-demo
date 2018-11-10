@@ -28,7 +28,7 @@ type CloudEvent struct {
 
 const headerPrefix = "ce-"
 
-func (c CloudEvent) inititialise(eType string) {
+func (c *CloudEvent) inititialise(eType string) {
 
 	c.Type = eType
 	c.SpecVersion = "0.1"
