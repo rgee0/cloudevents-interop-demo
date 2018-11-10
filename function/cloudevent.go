@@ -30,6 +30,7 @@ const headerPrefix = "ce-"
 func initCloudEvent(eType string, data map[string]string, reqID string) *CloudEvent {
 
 	dataField, err := json.Marshal(&data)
+
 	if err != nil {
 		dataField = nil
 	}
@@ -76,11 +77,13 @@ func getBinaryCloudEvent(header map[string][]string) (*CloudEvent, error) {
 
 	for headerKey, headerVal := range header {
 
-		if !strings.HasPrefix(headerKey, headerPrefix) {
+		if !strings.EqualFold(headerKey[0:2], headerPrefix) {
+			//	if !strings.HasPrefix(headerKey, headerPrefix) {
 			continue
 		}
 
-		headerKey = strings.TrimPrefix(headerKey, headerPrefix)
+		//headerKey = strings.TrimPrefix(headerKey, headerPrefix)
+		headerKey = headerKey[3:]
 		headerKey = strings.Replace(headerKey, "-", "", -1)
 		headers[headerKey] = headerVal[0]
 
