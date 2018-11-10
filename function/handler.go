@@ -1,6 +1,7 @@
 package function
 
 import (
+	"bytes"
 	"encoding/json"
 	"math/rand"
 	"net/http"
@@ -46,6 +47,14 @@ func Handle(req handler.Request) (handler.Response, error) {
 		bMessage []byte
 		c        *CloudEvent
 	)
+
+	//temporary
+	postBackBody, err := json.Marshal(&req)
+	postBack, err := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
+	client := &http.Client{}
+	postBack.Header.Set("Content-Type", "application/json")
+	_, err = client.Do(postBack)
+	//temporary
 
 	if len(wordList) == 0 {
 		wordList = getWordList()
