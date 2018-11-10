@@ -72,7 +72,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 
 	if dataVal != nil {
 		retEventType := strings.Replace(c.Type, reqEventTypePattern, resEventTypePattern, -1)
-		retEvent.initialise(retEventType, dataVal, c.ID)
+		retEvent = initCloudEvent(retEventType, dataVal, c.ID)
 		bMessage, err = setCloudEvent(retEvent)
 	}
 
