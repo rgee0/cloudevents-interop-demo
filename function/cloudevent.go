@@ -103,7 +103,7 @@ func setCloudEvent(c *CloudEvent) ([]byte, error) {
 	return retBytes, nil
 }
 
-func sendCloudEvent(c *CloudEvent, err error) (handler.Response, error) {
+func sendCloudEvent(c *CloudEvent, structuredRequest bool, err error) (handler.Response, error) {
 
 	if err != nil {
 		return handler.Response{}, err

@@ -76,7 +76,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		bMessage, err = setCloudEvent(retEvent)
 	}
 
-	return sendCloudEvent(retEvent, err)
+	return sendCloudEvent(retEvent, structuredRequest, err)
 	//	return handler.Response{
 	//		Body:       bMessage,
 	//		StatusCode: http.StatusOK,
