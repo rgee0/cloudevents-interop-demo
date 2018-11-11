@@ -100,17 +100,6 @@ func Handle(req handler.Request) (handler.Response, error) {
 		callbackURL = cbVal
 	}
 
-	//temporary
-	/*if !structuredRequest {
-		postBackBody, _ := json.Marshal(&req)
-		postBack, _ := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
-		client := &http.Client{}
-		postBack.Header.Set("Content-Type", "application/json")
-		postBack.Header.Set("burt", strings.Join(callbackURL, ","))
-		_, _ = client.Do(postBack)
-	}*/
-	//temporary
-
 	c, err = getCloudEvent(&req, structuredRequest)
 
 	wordType := strings.Split(c.Type, ".")[2]
