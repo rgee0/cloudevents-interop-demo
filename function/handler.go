@@ -71,12 +71,17 @@ func sendCloudEvent(c *CloudEvent, structuredRequest bool, callbackURL []string,
 
 	//Async request?
 	if len(callbackURL) > 0 {
-		postBack, _ := http.NewRequest("POST", callbackURL[0], bytes.NewBuffer(bMessage))
+		postBack, _ := http.NewRequest(http.MethodPost, callbackURL[0], bytes.NewBuffer(bMessage))
 		client := &http.Client{}
 		for k, v := range headerVals {
 			postBack.Header.Set(k, strings.Join(v, ","))
 		}
-		_, _ = client.Do(postBack)
+		res, resErr := client.Do(postBack)
+		if resErr != nil {
+			err = resErr
+		}
+
+		defer res.Body.Close()
 
 		bMessage, headerVals, statusCode = nil, nil, http.StatusAccepted
 
