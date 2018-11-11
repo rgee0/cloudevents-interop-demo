@@ -2,6 +2,7 @@ package function
 
 import (
 	"math/rand"
+	"net/http"
 	"strings"
 	"time"
 
@@ -38,12 +39,55 @@ func isStructured(httpContentTypes []string) bool {
 	return false
 }
 
+// sendCloudEvent - take an existing cloud event struct and generate the handler response for it according to
+// the demo conventions.  Respond to requests with the respective event type (binary/structured).
+// If X-Callback-URL is set then send only a 202 to the client with the response event sent to X-Callback-URL
+func sendCloudEvent(c *CloudEvent, structuredRequest bool, callbackURL string, err error) (handler.Response, error) {
+
+	var (
+		bMessage   []byte
+		headerVals map[string][]string
+		statusCode = http.StatusOK
+	)
+
+	if err != nil {
+		return handler.Response{}, err
+	}
+
+	if structuredRequest {
+		bMessage, headerVals, err = setStructuredCloudEvent(c)
+	} else {
+		bMessage, headerVals, err = setBinaryCloudEvent(c)
+	}
+
+	if len(callbackURL) > 0 {
+		statusCode = http.StatusAccepted
+	}
+
+	return handler.Response{
+		Body:       bMessage,
+		StatusCode: statusCode,
+		Header:     headerVals,
+	}, err
+}
+
+//temporary
+/*if !structuredRequest {
+	postBackBody, _ := json.Marshal(&req)
+	postBack, _ := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
+	client := &http.Client{}
+	postBack.Header.Set("Content-Type", "application/json")
+	_, _ = client.Do(postBack)
+}*/
+//temporary
+
 // Handle a function invocation
 func Handle(req handler.Request) (handler.Response, error) {
 
 	var (
 		err         error
 		c, retEvent *CloudEvent
+		callbackURL string
 	)
 
 	if len(wordList) == 0 {
@@ -51,17 +95,12 @@ func Handle(req handler.Request) (handler.Response, error) {
 	}
 
 	structuredRequest := isStructured(req.Header["Content-Type"])
-	c, err = getCloudEvent(&req, structuredRequest)
 
-	//temporary
-	/*if !structuredRequest {
-		postBackBody, _ := json.Marshal(&req)
-		postBack, _ := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
-		client := &http.Client{}
-		postBack.Header.Set("Content-Type", "application/json")
-		_, _ = client.Do(postBack)
-	}*/
-	//temporary
+	if cbVal, ok := req.Header["X-Callback-URL"]; ok {
+		callbackURL = cbVal[0]
+	}
+
+	c, err = getCloudEvent(&req, structuredRequest)
 
 	wordType := strings.Split(c.Type, ".")[2]
 	dataVal := getWordValue(wordList[wordType])
@@ -71,6 +110,6 @@ func Handle(req handler.Request) (handler.Response, error) {
 		retEvent = initCloudEvent(retEventType, dataVal, c.ID)
 	}
 
-	return sendCloudEvent(retEvent, structuredRequest, true, err)
+	return sendCloudEvent(retEvent, structuredRequest, callbackURL, err)
 
 }
