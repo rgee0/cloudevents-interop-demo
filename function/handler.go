@@ -40,6 +40,14 @@ func isStructured(httpContentTypes []string) bool {
 	return false
 }
 
+func extractCallbackURL(req *handler.Request) []string {
+
+	if cbVal, ok := req.Header["X-Callback-Url"]; ok {
+		return cbVal
+	}
+	return nil
+}
+
 // sendCloudEvent - take an existing cloud event struct and generate the handler response for it according to
 // the demo conventions.  Respond to requests with the respective event type (binary/structured).
 // If X-Callback-URL is set then send only a 202 to the client with the response event sent to X-Callback-URL
@@ -95,10 +103,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 	}
 
 	structuredRequest := isStructured(req.Header["Content-Type"])
-
-	if cbVal, ok := req.Header["X-Callback-Url"]; ok {
-		callbackURL = cbVal
-	}
+	callbackURL = extractCallbackURL(&req)
 
 	c, err = getCloudEvent(&req, structuredRequest)
 
