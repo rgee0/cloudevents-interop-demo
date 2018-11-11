@@ -2,7 +2,6 @@ package function
 
 import (
 	"bytes"
-	"encoding/json"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -62,8 +61,17 @@ func sendCloudEvent(c *CloudEvent, structuredRequest bool, callbackURL []string,
 		bMessage, headerVals, err = setBinaryCloudEvent(c)
 	}
 
+	//Async request?
 	if len(callbackURL) > 0 {
-		statusCode = http.StatusAccepted
+		postBack, _ := http.NewRequest("POST", callbackURL[0], bytes.NewBuffer(bMessage))
+		client := &http.Client{}
+		for k, v := range headerVals {
+			postBack.Header.Set(k, strings.Join(v, ","))
+		}
+		_, _ = client.Do(postBack)
+
+		bMessage, headerVals, statusCode = nil, nil, http.StatusAccepted
+
 	}
 
 	return handler.Response{
@@ -93,14 +101,14 @@ func Handle(req handler.Request) (handler.Response, error) {
 	}
 
 	//temporary
-	if !structuredRequest {
+	/*if !structuredRequest {
 		postBackBody, _ := json.Marshal(&req)
 		postBack, _ := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
 		client := &http.Client{}
 		postBack.Header.Set("Content-Type", "application/json")
 		postBack.Header.Set("burt", strings.Join(callbackURL, ","))
 		_, _ = client.Do(postBack)
-	}
+	}*/
 	//temporary
 
 	c, err = getCloudEvent(&req, structuredRequest)
