@@ -71,6 +71,6 @@ func Handle(req handler.Request) (handler.Response, error) {
 		retEvent = initCloudEvent(retEventType, dataVal, c.ID)
 	}
 
-	return sendCloudEvent(retEvent, structuredRequest, err)
+	return sendCloudEvent(retEvent, structuredRequest, true, err)
 
 }

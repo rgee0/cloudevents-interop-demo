@@ -130,26 +130,32 @@ func setBinaryCloudEvent(c *CloudEvent) ([]byte, map[string][]string, error) {
 	return retBytes, header, nil
 }
 
-func sendCloudEvent(c *CloudEvent, structuredRequest bool, err error) (handler.Response, error) {
+func sendCloudEvent(c *CloudEvent, structuredRequest bool, async bool, err error) (handler.Response, error) {
 
 	var (
 		bMessage   []byte
 		headerVals map[string][]string
+		statusCode = http.StatusAccepted
 	)
 
 	if err != nil {
 		return handler.Response{}, err
 	}
 
-	if structuredRequest {
-		bMessage, headerVals, err = setStructuredCloudEvent(c)
-	} else {
-		bMessage, headerVals, err = setBinaryCloudEvent(c)
+	if !async {
+
+		if structuredRequest {
+			bMessage, headerVals, err = setStructuredCloudEvent(c)
+		} else {
+			bMessage, headerVals, err = setBinaryCloudEvent(c)
+		}
+
+		statusCode = http.StatusOK
 	}
 
 	return handler.Response{
 		Body:       bMessage,
-		StatusCode: http.StatusOK,
+		StatusCode: statusCode,
 		Header:     headerVals,
 	}, err
 
