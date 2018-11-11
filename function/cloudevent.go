@@ -103,7 +103,7 @@ func setStructuredCloudEvent(c *CloudEvent) ([]byte, map[string][]string, error)
 	}
 
 	header := map[string][]string{
-		"Content-Type": []string{"application/cloudevents+json"},
+		"Content-Type": []string{"application/cloudevents+json; charset=utf-8"},
 	}
 
 	return retBytes, header, nil
@@ -117,14 +117,14 @@ func setBinaryCloudEvent(c *CloudEvent) ([]byte, map[string][]string, error) {
 	}
 
 	header := map[string][]string{
-		"Content-Type":    []string{"application/json"},
-		"ce-type":         []string{c.Type},
-		"ce-specversion":  []string{c.SpecVersion},
-		"ce-id":           []string{c.ID},
-		"ce-source":       []string{c.Source},
-		"ce-time":         []string{c.Time.String()},
-		"ce-relatedid":    []string{c.RelatedID},
-		"ce-content-type": []string{c.ContentType},
+		"Content-Type":   []string{"application/json; charset=utf-8"},
+		"ce-type":        []string{c.Type},
+		"ce-specversion": []string{c.SpecVersion},
+		"ce-id":          []string{c.ID},
+		"ce-source":      []string{c.Source},
+		"ce-time":        []string{c.Time.Format("RFC3339")},
+		"ce-relatedid":   []string{c.RelatedID},
+		"ce-contenttype": []string{c.ContentType},
 	}
 
 	return retBytes, header, nil

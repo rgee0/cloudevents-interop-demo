@@ -1,10 +1,7 @@
 package function
 
 import (
-	"bytes"
-	"encoding/json"
 	"math/rand"
-	"net/http"
 	"strings"
 	"time"
 
@@ -57,13 +54,13 @@ func Handle(req handler.Request) (handler.Response, error) {
 	c, err = getCloudEvent(&req, structuredRequest)
 
 	//temporary
-	if !structuredRequest {
+	/*if !structuredRequest {
 		postBackBody, _ := json.Marshal(&req)
 		postBack, _ := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
 		client := &http.Client{}
 		postBack.Header.Set("Content-Type", "application/json")
 		_, _ = client.Do(postBack)
-	}
+	}*/
 	//temporary
 
 	wordType := strings.Split(c.Type, ".")[2]
