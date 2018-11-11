@@ -44,7 +44,7 @@ func isStructured(httpContentTypes []string) bool {
 // sendCloudEvent - take an existing cloud event struct and generate the handler response for it according to
 // the demo conventions.  Respond to requests with the respective event type (binary/structured).
 // If X-Callback-URL is set then send only a 202 to the client with the response event sent to X-Callback-URL
-func sendCloudEvent(c *CloudEvent, structuredRequest bool, callbackURL string, err error) (handler.Response, error) {
+func sendCloudEvent(c *CloudEvent, structuredRequest bool, callbackURL []string, err error) (handler.Response, error) {
 
 	var (
 		bMessage   []byte
