@@ -16,12 +16,12 @@ import (
 type CloudEvent struct {
 	Type             string            `json:"type"`
 	EventTypeVersion string            `json:"eventTypeVersion,omitempty"`
-	SpecVersion      string            `json:"specVersion"`
+	SpecVersion      string            `json:"specversion"`
 	Source           string            `json:"source"`
 	ID               string            `json:"id"`
 	Time             time.Time         `json:"time,omitempty"`
 	RelatedID        string            `json:"relatedid,omitempty"`
-	ContentType      string            `json:"contentType,omitempty"`
+	ContentType      string            `json:"contenttype,omitempty"`
 	Extensions       map[string]string `json:"extensions,omitempty"`
 	Data             json.RawMessage   `json:"data,omitempty"`
 }
@@ -109,13 +109,43 @@ func setStructuredCloudEvent(c *CloudEvent) ([]byte, map[string][]string, error)
 	return retBytes, header, nil
 }
 
+func setBinaryCloudEvent(c *CloudEvent) ([]byte, map[string][]string, error) {
+
+	retBytes, err := json.Marshal(c.Data)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	header := map[string][]string{
+		"Content-Type":    []string{"application/json"},
+		"ce-type":         []string{c.Type},
+		"ce-specversion":  []string{c.SpecVersion},
+		"ce-id":           []string{c.ID},
+		"ce-source":       []string{c.Source},
+		"ce-time":         []string{c.Time.String()},
+		"ce-relatedid":    []string{c.RelatedID},
+		"ce-content-type": []string{c.ContentType},
+	}
+
+	return retBytes, header, nil
+}
+
 func sendCloudEvent(c *CloudEvent, structuredRequest bool, err error) (handler.Response, error) {
+
+	var (
+		bMessage   []byte
+		headerVals map[string][]string
+	)
 
 	if err != nil {
 		return handler.Response{}, err
 	}
 
-	bMessage, headerVals, err := setStructuredCloudEvent(c)
+	if structuredRequest {
+		bMessage, headerVals, err = setStructuredCloudEvent(c)
+	} else {
+		bMessage, headerVals, err = setBinaryCloudEvent(c)
+	}
 
 	return handler.Response{
 		Body:       bMessage,
