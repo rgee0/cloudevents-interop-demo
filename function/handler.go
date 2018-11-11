@@ -79,7 +79,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 	var (
 		err         error
 		c, retEvent *CloudEvent
-		callbackURL string
+		callbackURL []string
 	)
 
 	if len(wordList) == 0 {
@@ -88,8 +88,8 @@ func Handle(req handler.Request) (handler.Response, error) {
 
 	structuredRequest := isStructured(req.Header["Content-Type"])
 
-	if cbVal, ok := req.Header["X-Callback-URL"]; ok {
-		callbackURL = cbVal[0]
+	if cbVal, ok := req.Header["X-Callback-Url"]; ok {
+		callbackURL = cbVal
 	}
 
 	//temporary
@@ -98,7 +98,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		postBack, _ := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
 		client := &http.Client{}
 		postBack.Header.Set("Content-Type", "application/json")
-		postBack.Header.Set("burt", callbackURL)
+		postBack.Header.Set("burt", strings.Join(callbackURL, ","))
 		_, _ = client.Do(postBack)
 	}
 	//temporary
