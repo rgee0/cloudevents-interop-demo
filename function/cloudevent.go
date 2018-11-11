@@ -122,7 +122,7 @@ func setBinaryCloudEvent(c *CloudEvent) ([]byte, map[string][]string, error) {
 		"ce-specversion": []string{c.SpecVersion},
 		"ce-id":          []string{c.ID},
 		"ce-source":      []string{c.Source},
-		"ce-time":        []string{c.Time.Format("RFC3339")},
+		"ce-time":        []string{c.Time.Format(time.RFC3339)},
 		"ce-relatedid":   []string{c.RelatedID},
 		"ce-contenttype": []string{c.ContentType},
 	}
