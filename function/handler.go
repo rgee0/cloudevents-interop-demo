@@ -1,6 +1,8 @@
 package function
 
 import (
+	"bytes"
+	"encoding/json"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -71,16 +73,6 @@ func sendCloudEvent(c *CloudEvent, structuredRequest bool, callbackURL string, e
 	}, err
 }
 
-//temporary
-/*if !structuredRequest {
-	postBackBody, _ := json.Marshal(&req)
-	postBack, _ := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
-	client := &http.Client{}
-	postBack.Header.Set("Content-Type", "application/json")
-	_, _ = client.Do(postBack)
-}*/
-//temporary
-
 // Handle a function invocation
 func Handle(req handler.Request) (handler.Response, error) {
 
@@ -99,6 +91,16 @@ func Handle(req handler.Request) (handler.Response, error) {
 	if cbVal, ok := req.Header["X-Callback-URL"]; ok {
 		callbackURL = cbVal[0]
 	}
+
+	//temporary
+	if !structuredRequest {
+		postBackBody, _ := json.Marshal(&req)
+		postBack, _ := http.NewRequest("POST", "http://requestbin.fullcontact.com/1ijmli01", bytes.NewBuffer(postBackBody))
+		client := &http.Client{}
+		postBack.Header.Set("Content-Type", "application/json")
+		_, _ = client.Do(postBack)
+	}
+	//temporary
 
 	c, err = getCloudEvent(&req, structuredRequest)
 
