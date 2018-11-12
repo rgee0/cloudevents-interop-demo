@@ -58,6 +58,21 @@ func extractWordType(requestedType string) string {
 
 }
 
+func makeAsyncCall(callbackURL string, bMessage []byte, headerVals map[string][]string) {
+
+	postBack, _ := http.NewRequest(http.MethodPost, callbackURL, bytes.NewBuffer(bMessage))
+	client := &http.Client{}
+	for k, v := range headerVals {
+		postBack.Header.Set(k, strings.Join(v, ","))
+	}
+	res, resErr := client.Do(postBack)
+	if resErr != nil {
+		err = resErr
+	}
+
+	defer res.Body.Close()
+}
+
 // sendCloudEvent - take an existing cloud event struct and generate the handler response for it according to
 // the demo conventions.  Respond to requests with the respective event type (binary/structured).
 // If X-Callback-URL is set then send only a 202 to the client with the response event sent to X-Callback-URL
@@ -82,21 +97,7 @@ func sendCloudEvent(c *CloudEvent, structuredRequest bool, callbackURL []string,
 	//Async request?
 	if len(callbackURL) > 0 {
 
-		go func(callbackURL string, bMessage []byte, headerVals map[string][]string) {
-
-			postBack, _ := http.NewRequest(http.MethodPost, callbackURL, bytes.NewBuffer(bMessage))
-			client := &http.Client{}
-			for k, v := range headerVals {
-				postBack.Header.Set(k, strings.Join(v, ","))
-			}
-			res, resErr := client.Do(postBack)
-			if resErr != nil {
-				err = resErr
-			}
-
-			defer res.Body.Close()
-		}(callbackURL[0], bMessage, headerVals)
-
+		go makeAsyncCall(callbackURL[0], bMessage, headerVals)
 		bMessage, headerVals, statusCode = nil, nil, http.StatusAccepted
 
 	}
