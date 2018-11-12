@@ -48,6 +48,16 @@ func extractCallbackURL(req *handler.Request) []string {
 	return nil
 }
 
+func extractWordType(requestedType string) string {
+
+	splitType := strings.Split(requestedType, ".")
+	if len(splitType) == 3 {
+		return splitType[2]
+	}
+	return "noun"
+
+}
+
 // sendCloudEvent - take an existing cloud event struct and generate the handler response for it according to
 // the demo conventions.  Respond to requests with the respective event type (binary/structured).
 // If X-Callback-URL is set then send only a 202 to the client with the response event sent to X-Callback-URL
@@ -112,7 +122,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 
 	c, err = getCloudEvent(&req, structuredRequest)
 
-	wordType := strings.Split(c.Type, ".")[2]
+	wordType := extractWordType(c.Type)
 	dataVal := getWordValue(wordList[wordType])
 
 	if dataVal != nil {
