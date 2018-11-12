@@ -2,6 +2,7 @@ package function
 
 import (
 	"bytes"
+	"log"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -67,10 +68,11 @@ func makeAsyncCall(callbackURL string, bMessage []byte, headerVals map[string][]
 	}
 	res, resErr := client.Do(postBack)
 	if resErr != nil {
-		err = resErr
+		log.Println(resErr)
 	}
 
 	defer res.Body.Close()
+
 }
 
 // sendCloudEvent - take an existing cloud event struct and generate the handler response for it according to
