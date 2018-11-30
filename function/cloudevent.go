@@ -37,7 +37,7 @@ func initCloudEvent(eType string, data map[string]string, reqID string) *CloudEv
 
 	return &CloudEvent{
 		Type:        eType,
-		SpecVersion: "0.1",
+		SpecVersion: "0.2",
 		Source:      "https://rgee0.o6s.io/cloudevents-interop-demo",
 		ID:          uuid.Generate().String(),
 		RelatedID:   reqID,
