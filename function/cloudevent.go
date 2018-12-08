@@ -25,7 +25,10 @@ type CloudEvent struct {
 	Data             json.RawMessage   `json:"data,omitempty"`
 }
 
-const headerPrefix = "ce-"
+const (
+	headerPrefix = "ce-"
+	fnSource     = "https://rgee0.o6s.io/cloudevents-interop-demo"
+)
 
 func initCloudEvent(eType string, data map[string]string, reqID string) *CloudEvent {
 
@@ -38,7 +41,7 @@ func initCloudEvent(eType string, data map[string]string, reqID string) *CloudEv
 	return &CloudEvent{
 		Type:        eType,
 		SpecVersion: "0.2",
-		Source:      "https://rgee0.o6s.io/cloudevents-interop-demo",
+		Source:      fnSource,
 		ID:          uuid.Generate().String(),
 		RelatedID:   reqID,
 		Time:        time.Now(),
