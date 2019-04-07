@@ -5,8 +5,8 @@ functions:
   cloudevents-interop-demo:
     lang: golang-http
     handler: ./function
-    image: rgee0/cloudevents-interop-demo:latest
+    image: rgee0/cloudevents-interop-demo:0.1
+    labels:
+      com.openfaas.scale.zero: false
     environment: 
       wordsURL : https://srcdog.com/madlibs/words.txt
-
-
